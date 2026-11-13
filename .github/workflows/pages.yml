@@ -1,0 +1,78 @@
+name: Publicar TollCast en GitHub Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'web/**'
+      - '.github/workflows/pages.yml'
+  workflow_dispatch:
+
+# Permisos mínimos necesarios para publicar con Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Un solo despliegue a la vez; no cancelar el que está en curso
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  # 1) Verifica que la aplicación y los datos estén completos antes de publicar
+  verificar:
+    name: Verificar la aplicación
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Comprobar los archivos requeridos
+        run: |
+          set -e
+          for f in web/index.html web/css/styles.css web/js/app.js web/data.json; do
+            test -s "$f" || { echo "::error::Falta el archivo $f"; exit 1; }
+            echo "OK  $f  ($(du -h "$f" | cut -f1))"
+          done
+
+      - name: Comprobar que cada módulo JS al que se importa existe
+        run: |
+          set -e
+          missing=0
+          for imp in $(grep -rhoE "from '\./[a-z]+\.js'" web/js | sed "s/from '\.\///; s/'//"); do
+            test -f "web/js/$imp" || { echo "::error::Falta web/js/$imp"; missing=1; }
+          done
+          exit $missing
+
+      - name: Backtest reproducible del modelo
+        run: node tools/validate_models.mjs
+
+  # 2) Publica el contenido de web/ en GitHub Pages
+  desplegar:
+    name: Desplegar en GitHub Pages
+    needs: verificar
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configurar Pages
+        uses: actions/configure-pages@v5
+        with:
+          # Habilita Pages automáticamente si aún no está activado (fuente: GitHub Actions)
+          enablement: true
+
+      - name: Empaquetar el sitio (carpeta web/)
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: web
+
+      - id: deployment
+        name: Publicar
+        uses: actions/deploy-pages@v4
