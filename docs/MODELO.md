@@ -24,7 +24,13 @@ python3 serve.py 8080       # otro puerto
 Abra `web/index.html` en el navegador. La aplicación detecta que `fetch()` está bloqueado
 en `file://` y carga los datos desde `web/js/data.js`.
 
-### Opción C — cualquier servidor estático
+### Opción C — GitHub Pages
+
+Publicado en **https://fredyalexis-eng.github.io/Tr-fico-y-recaudo/** mediante
+`.github/workflows/pages.yml` (publica la carpeta `web/`). Requiere
+*Settings → Pages → Source: GitHub Actions*.
+
+### Opción D — cualquier servidor estático
 
 ```bash
 cd web && python3 -m http.server 8000

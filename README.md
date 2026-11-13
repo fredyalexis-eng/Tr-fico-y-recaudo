@@ -11,6 +11,14 @@ Agencia Nacional de Infraestructura (ANI), Operación Estadística de Tráfico y
 * **Botón de reporte** que genera un documento de análisis para el peaje seleccionado,
   imprimible como PDF o descargable como HTML.
 
+## Ver en línea (GitHub Pages)
+
+El sitio se publica automáticamente en **https://fredyalexis-eng.github.io/Tr-fico-y-recaudo/**
+cada vez que cambia algo en `web/` (workflow `.github/workflows/pages.yml`).
+
+Para activarlo en un repositorio recién creado: **Settings → Pages → Source: GitHub Actions**
+(el propio workflow intenta habilitarlo con `enablement: true`).
+
 ## Inicio rápido
 
 ```bash
@@ -61,6 +69,7 @@ node tools/test_app.mjs          # interfaz: 4 pestañas, interacciones y report
 
 ```
 serve.py                Servidor local
+.github/workflows/pages.yml   Despliegue automático en GitHub Pages
 tools/build_data.py     Excel → web/data.json + web/js/data.js
 tools/validate_models.mjs  Backtest reproducible (Node)
 tools/test_app.mjs      Pruebas de la interfaz (jsdom)
