@@ -123,13 +123,20 @@ Métricas por estación: MAPE, WMAPE, MAE, RMSE, R² y sesgo acumulado.
 
 ### 3.6 Reproducibilidad
 
-`tools/validate_models.mjs` re-ejecuta todo el *backtest* con el mismo motor que usa el
-navegador y lo compara contra una referencia calculada en Python
-(`tools/referencia_python.json`). La diferencia entre ambos es < 0,1 %.
+`tools/validate_models.mjs` re-ejecuta el *backtest* con el mismo motor que usa el
+navegador y comprueba la integridad de los datos, las métricas de los cinco modelos,
+que el modelo predeterminado siga siendo el de menor MAPE mediano y que la proyección
+del sistema coincida con la suma de las estaciones. Se valida con Node.js 22:
 
 ```bash
 node tools/validate_models.mjs
 ```
+
+La versión anterior del flujo comparaba contra un snapshot numérico de Python generado
+con otra versión del motor y un corte distinto. Ese snapshot quedó obsoleto y hacía
+fallar el despliegue aunque la app y el backtest actual funcionaran; por eso se sustituyó
+por verificaciones reproducibles de integridad y consistencia, sin números de referencia
+caducos.
 
 ### 3.7 Limitaciones
 
@@ -149,8 +156,7 @@ node tools/validate_models.mjs
 serve.py                          Servidor local
 tools/
   build_data.py                   Excel → web/data.json + web/js/data.js
-  validate_models.mjs             Backtest reproducible del motor JS
-  referencia_python.json          Referencia numérica (Python)
+  validate_models.mjs             Backtest y comprobaciones de coherencia del motor JS
   test_app.mjs                    Pruebas de humo (jsdom) de la interfaz
 web/
   index.html                      Interfaz
