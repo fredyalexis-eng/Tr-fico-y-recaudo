@@ -5,14 +5,19 @@ on:
     branches: [main]
     paths:
       - 'web/**'
+      - 'tools/validate_models.mjs'
+      - '.github/workflows/pages.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'web/**'
+      - 'tools/validate_models.mjs'
       - '.github/workflows/pages.yml'
   workflow_dispatch:
 
-# Permisos mínimos necesarios para publicar con Pages
+# Permiso mínimo para verificaciones; publicar obtiene permisos en su propio job.
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 # Un solo despliegue a la vez; no cancelar el que está en curso
 concurrency:
@@ -29,7 +34,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
 
       - name: Comprobar los archivos requeridos
         run: |
@@ -54,8 +59,14 @@ jobs:
   # 2) Publica el contenido de web/ en GitHub Pages
   desplegar:
     name: Desplegar en GitHub Pages
+    # El flujo se puede ejecutar manualmente para verificar una rama, pero solo main publica.
+    if: github.ref == 'refs/heads/main'
     needs: verificar
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
